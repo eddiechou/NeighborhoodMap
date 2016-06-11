@@ -1,12 +1,37 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
     <title>Neighborhood Map</title>
-</head>
-<body>
+    <meta name="viewport" content="initial-scale=1.0">
+    <meta charset="UTF-8">
 
-    <script src="js/lib/knockout-3.2.0.js"></script>
-    <script src="js/app.js"></script>
+
+    <script src="lib/jquery-2.2.4.min.js"></script>
+    <script src="lib/bootstrap-3.3.6-dist/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="lib/bootstrap-3.3.6-dist/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="css/style.css">
+
+
+</head>
+
+<body>
+    <div id="wrapper">
+        <div id="left-sidebar">
+            <h3>Parks in Taipei</h3>
+            <input type="text" data-bind="value: filter">
+            <ul id="places-list" class="no-bullets">
+            </ul>
+        </div>
+
+        <div id="content">
+            <button id="toggle-sidebar">Toggle</button>
+
+            <div id="map" data-bind="map"></div>
+        </div>
+
+        <script src="js/lib/knockout-3.2.0.js"></script>
+        <script src="js/app.js"></script>
+        <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDa2gdG2HkgOwVNbYbFzb1BG7XcvN8LZ28&libraries=places&callback=initMap"></script>
+    </div>
 </body>
 </html>

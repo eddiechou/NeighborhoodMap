@@ -9,11 +9,18 @@ This application uses Knockout.js as a framework to develop a single page applic
 ---
 
 Functionality:
--Highlighted locations
--Third-party data about those locations
--Various ways to browse the content
+- Map Markers to identify popular locations or places you'd like to visit
+- Search function to easily discover these locations
+- Listview to support simple browsing of all locations
+- Third-party data that provides additional information about those locations
+- Various ways to browse the content
 
 ---
+
+Things Learned:
+- AJAX calls to 3rd party APIs
+- Knockout organizational framework
+- Error-handling to provide users with a consistent and good experience
 
 # Notes
 

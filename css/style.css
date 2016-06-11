@@ -1,0 +1,33 @@
+html, body {
+    height: 100%;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    background: black;
+    color: grey;
+}
+
+#wrapper {
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+}
+
+#left-sidebar{
+    float: left;
+    width: 250px;
+}
+
+#content{
+    height: 100%;
+    width: 100%;
+}
+
+#map {
+    height: 100%
+}
+
+.no-bullets {
+    padding-left:0px;
+    list-style-type: none;
+}
