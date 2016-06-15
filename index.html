@@ -12,17 +12,12 @@
 
 <body>
     <div id="wrapper">
-        <div id="left-sidebar" data-bind="with: map">
+        <div id="left-sidebar" data-bind="with: locationsData">
             <h3>Parks in Taipei</h3>
             <input type="text" data-bind="value: filter, valueUpdate: 'afterkeydown'" />
-            <ul data-bind="foreach: filteredPlacesList" class="no-bullets">
-                    <li data-bind="text: $data">
-            </ul>
-
-            <h3>Wikipedia RESULTS</h3>
-            <ul data-bind="foreach: wikipediaResults">
-                <li data-bind="text: $data">
-            </ul>
+            <ol data-bind="foreach: filteredPlacesList">
+                    <li data-bind="text: $data, click: $parent.dropMarker">
+            </ol>
         </div>
 
         <div id="content">
@@ -31,7 +26,7 @@
         </div>
 
         <script src="js/lib/knockout-3.2.0.js"></script>
-        <script src="js/app.js"></script>
+        <script src="js/appl.js"></script>
         <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDa2gdG2HkgOwVNbYbFzb1BG7XcvN8LZ28&libraries=places&callback=initMap"></script>
     </div>
 </body>

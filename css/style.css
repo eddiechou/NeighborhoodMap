@@ -33,5 +33,5 @@ html, body {
 
 .no-bullets {
     padding-left:0px;
-    list-style-type: none;
+    list-style-type: decimal;
 }
