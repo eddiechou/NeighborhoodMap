@@ -1,3 +1,4 @@
+
 // Toggle the left sidebar button
 $("#toggle-sidebar").click(function(){
 	$("#left-sidebar").toggle();
@@ -15,6 +16,7 @@ var londonMapOptions = {
 // Google Maps API call stored in global map variable
 var map = function(mapOptions){
 	var self = this;
+	self.latlng = {lat: mapOptions.locLat, lng: mapOptions.locLong};
 
 	initMap = function(){
 		var neighborhood = new google.maps.LatLng(mapOptions.locLat, mapOptions.locLong);
@@ -57,6 +59,7 @@ var map = function(mapOptions){
 		if (status == google.maps.places.PlacesServiceStatus.OK) {
 			storeResults(results);
 			createMarkers(results);
+			createInfoWindows(results);
 			//getWikiURLs();
 			//getFlickrImages();
 		}
@@ -88,17 +91,22 @@ var map = function(mapOptions){
 
 	        // Create the marker with these parameters and store together in Location object
 	        $.each(appViewModel.locationsData.locations(), function(i, loc){
+	        	// Find the relevant Location object
 	        	if(loc.name == place.name){
-    		        loc.marker = new google.maps.Marker({
+    		        loc.marker = ko.observable(new google.maps.Marker({
     					map: map,
     					icon: image,
     					title: place.name,
     					position: place.geometry.location,
     					animation: google.maps.Animation.DROP
-    		        });
-    		        loc.marker.addListener('click', (function(marker){
+    		        }));
+    		        // Marker on click event listener
+    		        loc.marker().addListener('click', (function(marker){
     		        	return function(){
-    		        		marker.setAnimation(google.maps.Animation.BOUNCE);
+    		        		marker().setAnimation(google.maps.Animation.BOUNCE);
+    		        		setTimeout(function(){
+    		        			marker().setAnimation(null);
+    		        		},2000);
     		        	}
     		        })(loc.marker));
 	        	}
@@ -108,12 +116,39 @@ var map = function(mapOptions){
 	    map.fitBounds(bounds);
 	}
 
+	// Creates a new marker for each returned place
+	function createInfoWindows(places) {
+
+	    // For each place in places, create an InfoWindow
+	    for (var i = 0, place; place = places[i]; i++) {
+
+	        // Create the infoWindow and store it in respective Location objects
+	        $.each(appViewModel.locationsData.locations(), function(i, loc){
+	        	// Find the relevant Location objects
+	        	if(loc.name == place.name){
+    		        (function(name){
+    		        	loc.infoWindow = new google.maps.InfoWindow({
+    		            	content: '<h1>' + name + '</h1><p>Testing InfoWindow</p>'})
+    		        })(place.name);
+
+    		        loc.marker().addListener('click', (function(marker){
+    		        	return function(){
+    		        		loc.infoWindow.open(map, marker);
+    		        	}
+    		        })(loc.marker));
+	        	}
+	        });
+	    }
+	}
+
 }(londonMapOptions);
 
 // Stores all information related to a particular location together
 var Location = function(name){
 	var self = this;
-	self.marker = null;
+	self.marker = ko.observable(new google.maps.Marker({
+    	position: self.latlng}));
+
 	self.name = name;
 	self.images = [];	// Array of URLs
 	self.wikiLink = "";	// URL of wikipedia article
@@ -154,29 +189,20 @@ var LocationsData = function(){
 
 	/*
 	 * Markers filtering
-	 */
-	// Markers populated from Google Maps search API call
-	self.markers = ko.observableArray();
-
-	// The markers computed based on the filter
-	self.filteredMarkers = ko.computed(function(){
-		if(!self.filter()) {
-			return self.markers();
-		} else {
-			return ko.utils.arrayFilter(self.markers(), function(marker) {
-				return (marker.title.toLowerCase().indexOf(self.filter().toLowerCase())) !== -1 ? marker : null});
-		}
-	});
-	// Only display markers based on filter
-	self.filteredMarkers.subscribe(function() {
+	**/
+	self.filteredPlacesList.subscribe(function() {
 		// Clear all markers from map
-		$.each(self.markers(), function(){
-			this.setMap(null);
+		$.each(appViewModel.locationsData.locations(), function(i, loc){
+			loc.marker().setMap(null);
 		});
 
-		// Put all filtered markers on map
-		$.each(self.filteredMarkers(), function(){
-			this.setMap(map);
+		// Put all markers of filtered places on map back on
+		$.each(appViewModel.locationsData.filteredPlacesList(), function(i, place){
+			$.each(appViewModel.locationsData.locations(), function(j, loc){
+				if(loc.name == place) {
+					loc.marker().setMap(map);
+				}
+			});
 		});
 	});
 
@@ -185,8 +211,15 @@ var LocationsData = function(){
 var appViewModel = {
 	locationsData: new LocationsData(),
 
-	dropMarker : function(){
-
+	bounceMarker : function(placeName){
+		$.each(appViewModel.locationsData.locations(), function(i, loc){
+			if(loc.name == placeName){
+				loc.marker().setAnimation(google.maps.Animation.BOUNCE);
+				setTimeout(function(){
+					loc.marker().setAnimation(null);
+				},2000);
+			}
+		});
 	}
 };
 

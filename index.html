@@ -16,7 +16,7 @@
             <h3>Parks in Taipei</h3>
             <input type="text" data-bind="value: filter, valueUpdate: 'afterkeydown'" />
             <ol data-bind="foreach: filteredPlacesList">
-                    <li data-bind="text: $data, click: $parent.dropMarker">
+                    <li data-bind="text: $data, click: $root.bounceMarker">
             </ol>
         </div>
 
@@ -27,7 +27,11 @@
 
         <script src="js/lib/knockout-3.2.0.js"></script>
         <script src="js/appl.js"></script>
-        <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDa2gdG2HkgOwVNbYbFzb1BG7XcvN8LZ28&libraries=places&callback=initMap"></script>
+        <script async defer
+         src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDa2gdG2HkgOwVNbYbFzb1BG7XcvN8LZ28&libraries=places&callback=initMap"></script>
+
+
+
     </div>
 </body>
 </html>
