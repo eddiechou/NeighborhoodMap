@@ -1,226 +1,296 @@
+/**
+ * appl.js
+ *
+ * Eddie Chou
+ *
+ * Contains map initialization data, mapError, and mapSuccess functions
+ * that are called on success or failure regarding the call to the Google
+ * Maps API, respectively.
+ *
+ */
+ // Contains map initialization information and 5 hard-coded locations/markers
+ var mapInfo = {
+ 	initialData: {
+ 		position: {
+ 			lat: 51.507,
+ 			lng: -0.020
+ 		},
+ 		zoom: 12
+ 	},
+ 	museumMarkers: [
+ 		{
+ 			name: 'Ragged School Museum',
+ 			location: {lat: 51.5187639, lng: -0.035701},
+ 		},
+ 		{
+ 			name: "Alexander Fleming Laboratory",
+ 			location: {lat: 51.517162, lng: -0.173442},
+ 		},
+ 		{
+ 			name: "Hackney Museum",
+ 			location: {lat: 51.5445, lng: -0.055853},
+ 		},
+ 		{
+ 			name: "Royal Observatory Greenwich",
+ 			location: {lat: 51.476853, lng: -0.000500},
+ 		},
+ 		{
+ 			name: "The National Gallery",
+ 			location: {lat: 51.5089, lng: 0.1283},
+ 		}
+ 	]
+ };
 
 // Toggle the left sidebar button
 $("#toggle-sidebar").click(function(){
 	$("#left-sidebar").toggle();
 });
 
-// Map options for London, UK with query: "Parks"
-var londonMapOptions = {
-	locLat : 51.507,
-	locLong : 0.128,
-	radius : "10000",
-	query : "Museums",
-	zoom : 11
-}
+// Callback function for Google Maps API
+var mapSuccess = function(){
+	var ViewModel = function(){
+		var self = this;
+		self.map;
+		self.markers = ko.observableArray();
+		self.filter = ko.observable('');	// Bound to input query bar
 
-// Google Maps API call stored in global map variable
-var map = function(mapOptions){
-	var self = this;
-	self.latlng = {lat: mapOptions.locLat, lng: mapOptions.locLong};
+		// Filter markers based on filter (user input)
+		self.displayedMarkers = ko.observableArray([]);
 
-	initMap = function(){
-		var neighborhood = new google.maps.LatLng(mapOptions.locLat, mapOptions.locLong);
+		self.openedInfoWindows = [];
+		self.infoWindowTemplate = "<div><h3>%Location%</h3></div><div>" +
+			"Wikipedia: <a href='%WikiLinkURL%'>%WikiLinkContent%</a><p>%WikiData%</p></div><div>" +
+			"<img class='flickr-img' src='%Img0%' alt='museum' height='200' width='200'></img>" +
+			"<img class='flickr-img' src='%Img1%' alt='museum' height='200' width='200'></img>" +
+			"<img class='flickr-img' src='%Img2%' alt='museum' height='200' width='200'></img>" +
+			"</div>";
 
-		// Create new map with marker for center location
-		map = new google.maps.Map(document.getElementById('map'), {
-		  center: neighborhood,
-		  zoom: mapOptions.zoom
-		});
-
-		// Create marker for center of neighborhood
-		marker = new google.maps.Marker({
-		    position: neighborhood,
-		    map: map
-		});
-
-		// Search service implementing search query for locations near the neighborhood
-		var request = {
-		    location: neighborhood,
-		    radius: mapOptions.radius,
-		    query: mapOptions.query
-		}
-		self.service = new google.maps.places.PlacesService(map);
-		self.service.textSearch(request, serviceCallback);
-
-		// Test for InfoWindow on this marker
-		var contentString = '<p>InfoWindow Test</p>';
-		infoWindow = new google.maps.InfoWindow({
-		    content: '<h1>London, UK</h1><p>Testing InfoWindow</p>'
-		});
-
-		// Event listener for marker click
-		marker.addListener('click', function() {
-		    infoWindow.open(map, marker);
-		});
-	}
-
-	// Callback function for Maps API search query
-	function serviceCallback(results, status) {
-		if (status == google.maps.places.PlacesServiceStatus.OK) {
-			storeResults(results);
-			createMarkers(results);
-			createInfoWindows(results);
-			//getWikiURLs();
-			//getFlickrImages();
-		}
-	}
-
-	// Stores results
-	function storeResults(places) {
-		$.each(places, function(i, place){
-			// Push each place to KO observableArray
-			appViewModel.locationsData.placesList.push(place);
-		});
-	}
-
-	// Creates a new marker for each returned place
-	function createMarkers(places) {
-	    var bounds = new google.maps.LatLngBounds();
-
-	    // For each place in places, create a marker
-	    for (var i = 0, place; place = places[i]; i++) {
-
-	    	// Marker image creation
-	        var image = {
-				url: place.icon,
-				size: new google.maps.Size(71, 71),
-				origin: new google.maps.Point(0, 0),
-				anchor: new google.maps.Point(17, 34),
-				scaledSize: new google.maps.Size(25, 25)
-	        };
-
-	        // Create the marker with these parameters and store together in Location object
-	        $.each(appViewModel.locationsData.locations(), function(i, loc){
-	        	// Find the relevant Location object
-	        	if(loc.name == place.name){
-    		        loc.marker = ko.observable(new google.maps.Marker({
-    					map: map,
-    					icon: image,
-    					title: place.name,
-    					position: place.geometry.location,
-    					animation: google.maps.Animation.DROP
-    		        }));
-    		        // Marker on click event listener
-    		        loc.marker().addListener('click', (function(marker){
-    		        	return function(){
-    		        		marker().setAnimation(google.maps.Animation.BOUNCE);
-    		        		setTimeout(function(){
-    		        			marker().setAnimation(null);
-    		        		},2000);
-    		        	}
-    		        })(loc.marker));
-	        	}
-	        });
-	        bounds.extend(place.geometry.location);
-	    }
-	    map.fitBounds(bounds);
-	}
-
-	// Creates a new marker for each returned place
-	function createInfoWindows(places) {
-
-	    // For each place in places, create an InfoWindow
-	    for (var i = 0, place; place = places[i]; i++) {
-
-	        // Create the infoWindow and store it in respective Location objects
-	        $.each(appViewModel.locationsData.locations(), function(i, loc){
-	        	// Find the relevant Location objects
-	        	if(loc.name == place.name){
-    		        (function(name){
-    		        	loc.infoWindow = new google.maps.InfoWindow({
-    		            	content: '<h1>' + name + '</h1><p>Testing InfoWindow</p>'})
-    		        })(place.name);
-
-    		        loc.marker().addListener('click', (function(marker){
-    		        	return function(){
-    		        		loc.infoWindow.open(map, marker);
-    		        	}
-    		        })(loc.marker));
-	        	}
-	        });
-	    }
-	}
-
-}(londonMapOptions);
-
-// Stores all information related to a particular location together
-var Location = function(name){
-	var self = this;
-	self.marker = ko.observable(new google.maps.Marker({
-    	position: self.latlng}));
-
-	self.name = name;
-	self.images = [];	// Array of URLs
-	self.wikiLink = "";	// URL of wikipedia article
-	self.infoWindow = null;
-}
-
-var LocationsData = function(){
-	var self = this;
-
-	self.placesList = ko.observableArray(); // Holds all places returned by Google API search
-
-	// Creates a location object for each place
-	self.locations = ko.computed(function(){
-		return ko.utils.arrayMap(self.placesList(), function(place) {
-			return new Location(place.name);
-		});
-	});
-
-	// Names of places
-	self.placesNamesList = ko.computed(function(){
-		return ko.utils.arrayMap(self.locations(), function(loc) {
-			return loc.name;
-		});
-	});
-
-	// Filtered places based on input bar
-	self.filter = ko.observable();	// Store filter
-	self.filteredPlacesList = ko.computed(function() {
-		if(!self.filter()) {
-			return self.placesNamesList();
-		} else {
-			return ko.utils.arrayFilter(self.placesNamesList(), function(place) {
-				return (place.toLowerCase().indexOf(self.filter().toLowerCase())) !== -1 ? place : null});
-		}
-	});
-
-
-
-	/*
-	 * Markers filtering
-	**/
-	self.filteredPlacesList.subscribe(function() {
-		// Clear all markers from map
-		$.each(appViewModel.locationsData.locations(), function(i, loc){
-			loc.marker().setMap(null);
-		});
-
-		// Put all markers of filtered places on map back on
-		$.each(appViewModel.locationsData.filteredPlacesList(), function(i, place){
-			$.each(appViewModel.locationsData.locations(), function(j, loc){
-				if(loc.name == place) {
-					loc.marker().setMap(map);
-				}
+		// Ran whenever filter is changed
+		// Updates displayedMarkers to only contain those that have substring in 'filter' (from user input)
+		self.filterMarkers = function(){
+			var filMarkers = ko.utils.arrayFilter(self.markers(), function(marker) {
+				return ( marker.title.toLowerCase().indexOf(self.filter().toLowerCase()) !== -1 ) ? marker : null;
 			});
-		});
-	});
+			// Remove all markers from displayedMarkers and refill with the filtered markers
+			self.displayedMarkers.removeAll();
+			self.displayedMarkers(filMarkers);
 
-}
+			// Remove all markers from map
+			$.each(self.markers(), function(i, marker){
+				marker.setMap(null);
+			});
 
-var appViewModel = {
-	locationsData: new LocationsData(),
+			// Set markers on map that are filtered
+			$.each(self.displayedMarkers(), function(i, marker){
+				marker.setMap(self.map);
+			});
+		};
 
-	bounceMarker : function(placeName){
-		$.each(appViewModel.locationsData.locations(), function(i, loc){
-			if(loc.name == placeName){
-				loc.marker().setAnimation(google.maps.Animation.BOUNCE);
-				setTimeout(function(){
-					loc.marker().setAnimation(null);
-				},2000);
+		/** API CALLS **/
+
+		// Wikipedia API call
+		self.getWikiData = function(markers){
+			var getWikiDataURL = "https://en.wikipedia.org/w/api.php?action=opensearch&search=%museum%&format=json&callback=wikiCallback";
+
+			// For each marker, perform a wiki request for the location based on name
+			$.each(markers, function(i, marker){
+
+				// setTimeout for each marker's request
+				marker.wikiRequestTimeout = setTimeout(function(){
+					marker.hasWikiData = false;
+				}, 8000);
+
+				// AJAX call to Wiki API
+				$.ajax({
+					url: getWikiDataURL.replace("%museum%", marker.title),
+					dataType: "jsonp"
+				}).done(function(response){
+					clearTimeout(marker.wikiRequestTimeout);
+					marker.wikiData = response;
+					marker.hasWikiData = true;
+				});
+			});
+		};
+
+
+
+		// Flicker API call
+		self.getFlickrData = function(markers){
+
+			// var getFlickrDataURL = 'http://api.flickr.com/services/rest/?method=flickr.photos.search&' +
+			// 'api_key=eb53e93d71dd7f1f541d4b6938ce00ad&text=%placeName%&format=json';
+
+			var getFlickrDataURL = 'https://api.flickr.com/services/rest/?method=flickr.photos.search&' +
+			'api_key=277c87774701c55e10d7af90945b3a3d&text=%placeName%&lat=%lat%&lon=%lon%&format=json&nojsoncallback=1';
+
+
+
+			// For each marker, make Flickr API call
+			$.each(markers, function(i, marker){
+				console.log(marker);
+				var lat = marker.getPosition().lat();
+				var lon = marker.getPosition().lng();
+				// setTimeout for each marker's request
+				var flickrRequestTimeout = setTimeout(function(){
+					marker.hasFlickrImages = false;
+				}, 8000);
+
+				//
+				$.ajax({
+					url: getFlickrDataURL.replace("%placeName%", marker.title).replace("%lat%", lat).replace("%lon%", lon),
+					// dataType: "jsonp",
+					success: function(data) {
+						clearTimeout(flickrRequestTimeout);
+						marker.hasFlickrImages = true;
+						marker.flickrImages = [];
+
+						// Construct 3 image URLs
+
+						// You can construct the source URL to a photo once you know its ID, server ID, farm ID and secret, as returned by many API methods.
+						// Photo Source URLs:
+						// https://farm{farm-id}.staticflickr.com/{server-id}/{id}_{secret}.jpg
+						// 	or
+						// https://farm{farm-id}.staticflickr.com/{server-id}/{id}_{secret}_[mstzb].jpg
+						// 	or
+						// https://farm{farm-id}.staticflickr.com/{server-id}/{id}_{o-secret}_o.(jpg|gif|png)
+
+						var imgURLTemplate = 'https://farm%farm-id%.staticflickr.com/%server-id%/%id%_%secret%_q.jpg'
+						for (var i = 0; i < 3; i++){
+							var imgData = data.photos.photo[i];
+							marker.flickrImages[i] = imgURLTemplate.replace('%farm-id%', imgData.farm);
+							marker.flickrImages[i] = marker.flickrImages[i].replace('%server-id%', imgData.server);
+							marker.flickrImages[i] = marker.flickrImages[i].replace('%id%', imgData.id);
+							marker.flickrImages[i] = marker.flickrImages[i].replace('%secret%', imgData.secret);
+						}
+					}
+				});
+
+
+				// // Define the callback function for the API call
+				// jsonFlickrApi = function (data){
+				// 	clearTimeout(flickrRequestTimeout);
+				// 	marker.hasFlickrImages = true;
+				// 	marker.flickrData = [];
+				// 	// Construct 3 image URLs
+
+				// 	// You can construct the source URL to a photo once you know its ID, server ID, farm ID and secret, as returned by many API methods.
+				// 	// Photo Source URLs:
+				// 	// https://farm{farm-id}.staticflickr.com/{server-id}/{id}_{secret}.jpg
+				// 	// 	or
+				// 	// https://farm{farm-id}.staticflickr.com/{server-id}/{id}_{secret}_[mstzb].jpg
+				// 	// 	or
+				// 	// https://farm{farm-id}.staticflickr.com/{server-id}/{id}_{o-secret}_o.(jpg|gif|png)
+
+				// 	var imgURLTemplate = 'https://farm%farm-id%.staticflickr.com/%server-id%/%id%_%secret%_q.jpg'
+				// 	for (var i = 0; i < 3; i++){
+				// 		var imgData = data.photos.photo[i];
+				// 		marker.flickrData[i] = imgURLTemplate.replace('%farm-id%', imgData.farm);
+				// 		marker.flickrData[i] = marker.flickrData[i].replace('%server-id%', imgData.server);
+				// 		marker.flickrData[i] = marker.flickrData[i].replace('%id%', imgData.id);
+				// 		marker.flickrData[i] = marker.flickrData[i].replace('%secret%', imgData.secret);
+				// 	}
+				// 	console.log(marker.flickrData);
+				// };
+			});
+		};
+
+
+		// Initializes the map
+		this.initMap = function(mapData, locations){
+
+			// Create the map using Google Maps API
+			self.map = new google.maps.Map(document.getElementById('map'), {
+				center: mapData.position,
+				zoom: mapData.zoom
+			});
+
+			// Create new markers from the hard-coded locations data. Push them to both the
+			// full roster of markers and the
+			$.each(locations, function(i, location){
+				var marker = self.newMarker(location.name, location.location);
+				self.markers.push(marker);
+				self.displayedMarkers.push(marker);
+			});
+
+			// 3rd party API calls
+			self.getWikiData(self.markers());
+			self.getFlickrData(self.markers());
+		};
+
+		// Creates a marker
+		self.newMarker = function(name, location){
+			var museumIcon = 'images/museum.png';
+			// Construct a new marker using Google Maps API
+			var marker = new google.maps.Marker({
+				map: self.map,
+				title: name,
+				position: location,
+				icon: museumIcon,
+				animation: google.maps.Animation.DROP
+			});
+			marker.addListener('click', function(){
+				self.clickMarker(marker);
+			});
+			return marker;
+		};
+
+		self.clickMarker = function(marker){
+			// Close any opened infoWindows
+			self.openedInfoWindows.forEach(function(infoWindow){
+				infoWindow.close();
+			});
+
+			// Bounce animation for 2 seconds
+			marker.setAnimation(google.maps.Animation.BOUNCE);
+			setTimeout(function(){
+				marker.setAnimation(null);
+			}, 1400);
+
+			// Create and open infoWindow and add to list of open infoWindows
+			var infoWindow = new google.maps.InfoWindow({
+				content: self.markerInfoWindow(self.infoWindowTemplate, marker)
+			});
+			infoWindow.open(self.map, marker);
+			self.openedInfoWindows.push(infoWindow);
+		};
+
+		// Returns string containing HTML for marker's infoWindow (similar to resume project)
+		self.markerInfoWindow = function(template, marker){
+
+			// Wikipedia Success/Fail
+			var HTML = template.replace('%Location%', marker.title);
+			if (marker.hasWikiData){
+				HTML = HTML.replace('%WikiLinkContent%', marker.wikiData[1][0]);// Name of link
+				HTML = HTML.replace('%WikiData%', marker.wikiData[2][0]);		// Paragraph of info
+				HTML = HTML.replace('%WikiLinkURL%', marker.wikiData[3][0]);	// URL link
+			} else {
+				HTML = HTML.replace('%WikiData%', 'Wikipedia data cannot be loaded.');
+				HTML = HTML.replace('%WikiLinkContent%', '');
+				HTML = HTML.replace('%WikiLinkURL%', '');
 			}
-		});
-	}
+
+			// Flickr Success/Fail
+			if (marker.hasFlickrImages){
+				HTML = HTML.replace('%Img0%', marker.flickrImages[0]);
+				HTML = HTML.replace('%Img1%', marker.flickrImages[1]);
+				HTML = HTML.replace('%Img2%', marker.flickrImages[2]);
+			} else {
+				HTML = HTML.replace('%Img0%', 'images/flickr_error.png');
+				HTML = HTML.replace('%Img1%', 'images/flickr_error.png');
+				HTML = HTML.replace('%Img2%', 'images/flickr_error.png');
+				HTML = HTML.replace('museum image', 'Error loading images from Flickr.');
+			}
+
+			return HTML;
+		};
+
+		this.initMap(mapInfo.initialData, mapInfo.museumMarkers);
+	};
+	ko.applyBindings(new ViewModel());
 };
 
-ko.applyBindings(appViewModel);
+// Google Maps API error
+var mapError = function(){
+	var mapErrorHTML = '<p>ERROR LOADING MAP</p>';
+	$('#map').append(mapErrorHTML);
+}

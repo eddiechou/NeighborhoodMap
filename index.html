@@ -4,34 +4,32 @@
     <title>Neighborhood Map</title>
     <meta name="viewport" content="initial-scale=1.0">
     <meta charset="UTF-8">
-    <script src="lib/jquery-2.2.4.min.js"></script>
-    <script src="lib/bootstrap-3.3.6-dist/js/bootstrap.min.js"></script>
-    <link rel="stylesheet" type="text/css" href="lib/bootstrap-3.3.6-dist/css/bootstrap.min.css">
+
+
+    <link rel="stylesheet" type="text/css" href="js/lib/bootstrap-3.3.6-dist/css/bootstrap.min.css">
     <link rel="stylesheet" type="text/css" href="css/style.css">
 </head>
 
 <body>
     <div id="wrapper">
-        <div id="left-sidebar" data-bind="with: locationsData">
-            <h3>Parks in Taipei</h3>
-            <input type="text" data-bind="value: filter, valueUpdate: 'afterkeydown'" />
-            <ol data-bind="foreach: filteredPlacesList">
-                    <li data-bind="text: $data, click: $root.bounceMarker">
+        <div id="left-sidebar">
+            <h3>Museums in London</h3>
+            <input type="text" data-bind="textInput: filter, event: { 'keyup': filterMarkers }" />
+            <ol data-bind="foreach: displayedMarkers">
+                    <li data-bind="text: title, click: $parent.clickMarker">
             </ol>
         </div>
 
         <div id="content">
             <button id="toggle-sidebar">Toggle</button>
-            <div id="map" data-bind="map"></div>
+            <div id="map"></div>
         </div>
-
-        <script src="js/lib/knockout-3.2.0.js"></script>
-        <script src="js/appl.js"></script>
-        <script async defer
-         src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDa2gdG2HkgOwVNbYbFzb1BG7XcvN8LZ28&libraries=places&callback=initMap"></script>
-
-
-
     </div>
+    <script src="js/lib/jquery-2.2.4.min.js"></script>
+    <script src="js/lib/knockout-3.2.0.js"></script>
+
+    <script async defer
+     src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDa2gdG2HkgOwVNbYbFzb1BG7XcvN8LZ28&libraries=places&callback=mapSuccess" onerror="mapError()"></script>
+    <script src="js/appl.js"></script>
 </body>
 </html>
