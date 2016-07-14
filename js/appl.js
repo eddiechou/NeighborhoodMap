@@ -8,14 +8,22 @@
  * Maps API, respectively.
  *
  */
+
  // Contains map initialization information and 5 hard-coded locations/markers
+
+
+ // Toggle the sidebar
+  $("#toggle-button").click(function(){
+  	$('#sidebar').toggle();
+  });
+
  var mapInfo = {
  	initialData: {
  		position: {
- 			lat: 51.507,
- 			lng: -0.020
+ 			lat: 51.580,
+ 			lng: -0.100
  		},
- 		zoom: 12
+ 		zoom: 11
  	},
  	museumMarkers: [
  		{
@@ -37,14 +45,21 @@
  		{
  			name: "The National Gallery",
  			location: {lat: 51.5089, lng: 0.1283},
+ 		},
+ 		{
+ 			name: "Imperial War Museum",
+ 			location: {lat: 51.49083137, lng: -0.10499958}
+ 		},
+ 		{
+ 			name: "Tate Modern",
+ 			location: {lat: 51.5074, lng: 0.1001}
+ 		},
+ 		{
+ 			name: "Bank of England Museum",
+ 			location: {lat: 51.5141, lng: 0.0876}
  		}
  	]
  };
-
-// Toggle the left sidebar button
-$("#toggle-sidebar").click(function(){
-	$("#left-sidebar").toggle();
-});
 
 // Callback function for Google Maps API
 var mapSuccess = function(){
@@ -59,7 +74,7 @@ var mapSuccess = function(){
 
 		self.openedInfoWindows = [];
 		self.infoWindowTemplate = "<div><h3>%Location%</h3></div><div>" +
-			"Wikipedia: <a href='%WikiLinkURL%'>%WikiLinkContent%</a><p>%WikiData%</p></div><div>" +
+			"Wikipedia: <a href='%WikiLinkURL%' target='_blank'>%WikiLinkContent%</a><p>%WikiData%</p></div><div>" +
 			"<img class='flickr-img' src='%Img0%' alt='museum' height='200' width='200'></img>" +
 			"<img class='flickr-img' src='%Img1%' alt='museum' height='200' width='200'></img>" +
 			"<img class='flickr-img' src='%Img2%' alt='museum' height='200' width='200'></img>" +
@@ -112,38 +127,29 @@ var mapSuccess = function(){
 			});
 		};
 
-
-
 		// Flicker API call
 		self.getFlickrData = function(markers){
 
-			// var getFlickrDataURL = 'http://api.flickr.com/services/rest/?method=flickr.photos.search&' +
-			// 'api_key=eb53e93d71dd7f1f541d4b6938ce00ad&text=%placeName%&format=json';
-
 			var getFlickrDataURL = 'https://api.flickr.com/services/rest/?method=flickr.photos.search&' +
-			'api_key=277c87774701c55e10d7af90945b3a3d&text=%placeName%&lat=%lat%&lon=%lon%&format=json&nojsoncallback=1';
-
-
+			'api_key=eb53e93d71dd7f1f541d4b6938ce00ad&text=%placeName%&lat=%lat%&lon=%lon%&format=json&nojsoncallback=1';
 
 			// For each marker, make Flickr API call
 			$.each(markers, function(i, marker){
-				console.log(marker);
 				var lat = marker.getPosition().lat();
 				var lon = marker.getPosition().lng();
+
 				// setTimeout for each marker's request
 				var flickrRequestTimeout = setTimeout(function(){
 					marker.hasFlickrImages = false;
 				}, 8000);
 
-				//
 				$.ajax({
 					url: getFlickrDataURL.replace("%placeName%", marker.title).replace("%lat%", lat).replace("%lon%", lon),
-					// dataType: "jsonp",
 					success: function(data) {
 						clearTimeout(flickrRequestTimeout);
 						marker.hasFlickrImages = true;
 						marker.flickrImages = [];
-
+						console.log(data);
 						// Construct 3 image URLs
 
 						// You can construct the source URL to a photo once you know its ID, server ID, farm ID and secret, as returned by many API methods.
@@ -154,7 +160,7 @@ var mapSuccess = function(){
 						// 	or
 						// https://farm{farm-id}.staticflickr.com/{server-id}/{id}_{o-secret}_o.(jpg|gif|png)
 
-						var imgURLTemplate = 'https://farm%farm-id%.staticflickr.com/%server-id%/%id%_%secret%_q.jpg'
+						var imgURLTemplate = 'https://farm%farm-id%.staticflickr.com/%server-id%/%id%_%secret%_q.jpg';
 						for (var i = 0; i < 3; i++){
 							var imgData = data.photos.photo[i];
 							marker.flickrImages[i] = imgURLTemplate.replace('%farm-id%', imgData.farm);
@@ -164,33 +170,6 @@ var mapSuccess = function(){
 						}
 					}
 				});
-
-
-				// // Define the callback function for the API call
-				// jsonFlickrApi = function (data){
-				// 	clearTimeout(flickrRequestTimeout);
-				// 	marker.hasFlickrImages = true;
-				// 	marker.flickrData = [];
-				// 	// Construct 3 image URLs
-
-				// 	// You can construct the source URL to a photo once you know its ID, server ID, farm ID and secret, as returned by many API methods.
-				// 	// Photo Source URLs:
-				// 	// https://farm{farm-id}.staticflickr.com/{server-id}/{id}_{secret}.jpg
-				// 	// 	or
-				// 	// https://farm{farm-id}.staticflickr.com/{server-id}/{id}_{secret}_[mstzb].jpg
-				// 	// 	or
-				// 	// https://farm{farm-id}.staticflickr.com/{server-id}/{id}_{o-secret}_o.(jpg|gif|png)
-
-				// 	var imgURLTemplate = 'https://farm%farm-id%.staticflickr.com/%server-id%/%id%_%secret%_q.jpg'
-				// 	for (var i = 0; i < 3; i++){
-				// 		var imgData = data.photos.photo[i];
-				// 		marker.flickrData[i] = imgURLTemplate.replace('%farm-id%', imgData.farm);
-				// 		marker.flickrData[i] = marker.flickrData[i].replace('%server-id%', imgData.server);
-				// 		marker.flickrData[i] = marker.flickrData[i].replace('%id%', imgData.id);
-				// 		marker.flickrData[i] = marker.flickrData[i].replace('%secret%', imgData.secret);
-				// 	}
-				// 	console.log(marker.flickrData);
-				// };
 			});
 		};
 
@@ -201,7 +180,8 @@ var mapSuccess = function(){
 			// Create the map using Google Maps API
 			self.map = new google.maps.Map(document.getElementById('map'), {
 				center: mapData.position,
-				zoom: mapData.zoom
+				zoom: mapData.zoom,
+				mapTypeControl: false
 			});
 
 			// Create new markers from the hard-coded locations data. Push them to both the
@@ -256,7 +236,6 @@ var mapSuccess = function(){
 
 		// Returns string containing HTML for marker's infoWindow (similar to resume project)
 		self.markerInfoWindow = function(template, marker){
-
 			// Wikipedia Success/Fail
 			var HTML = template.replace('%Location%', marker.title);
 			if (marker.hasWikiData){
@@ -280,7 +259,6 @@ var mapSuccess = function(){
 				HTML = HTML.replace('%Img2%', 'images/flickr_error.png');
 				HTML = HTML.replace('museum image', 'Error loading images from Flickr.');
 			}
-
 			return HTML;
 		};
 

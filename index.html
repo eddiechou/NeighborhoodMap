@@ -4,25 +4,38 @@
     <title>Neighborhood Map</title>
     <meta name="viewport" content="initial-scale=1.0">
     <meta charset="UTF-8">
-
-
-    <link rel="stylesheet" type="text/css" href="js/lib/bootstrap-3.3.6-dist/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="css/w3.css">
     <link rel="stylesheet" type="text/css" href="css/style.css">
 </head>
 
 <body>
-    <div id="wrapper">
-        <div id="left-sidebar">
-            <h3>Museums in London</h3>
-            <input type="text" data-bind="textInput: filter, event: { 'keyup': filterMarkers }" />
-            <ol data-bind="foreach: displayedMarkers">
-                    <li data-bind="text: title, click: $parent.clickMarker">
-            </ol>
+    <div id="content">
+        <div id="map"></div>
+    </div>
+    <div id="top-left">
+        <div>
+            <button type="button" class="w3-opennav w3-large" id="toggle-button">&#9776;</button>
         </div>
+        <div class="w3-animate-opacity" id="sidebar">
+            <div class="sidebar-inside">
+                <div class="w3-container" id="sidebar-title-container">
+                    <h3 class="w3-center" id="sidebar-title">Museums in London</h3>
+                </div>
 
-        <div id="content">
-            <button id="toggle-sidebar">Toggle</button>
-            <div id="map"></div>
+
+
+                <div class="w3-container">
+                    <ul class="w3-ul w3-large w3-hoverable w3-center" data-bind="foreach: displayedMarkers">
+                        <li class="w3-padding-16" data-bind="text: title, click: $parent.clickMarker">
+                    </ul>
+                </div>
+
+
+                <form class="w3-container" id="sidebar-filter">
+                    <input class="w3-input" placeholder="Filter locations by name" type="text"
+                        data-bind="textInput: filter, event: { 'keyup': filterMarkers }"></input>
+                </form>
+            </div>
         </div>
     </div>
     <script src="js/lib/jquery-2.2.4.min.js"></script>
