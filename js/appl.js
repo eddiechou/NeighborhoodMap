@@ -72,8 +72,8 @@ var mapSuccess = function(){
 		// Filter markers based on filter (user input)
 		self.displayedMarkers = ko.observableArray([]);
 
-		self.openedInfoWindows = [];
-		self.infoWindowTemplate = "<div><h3>%Location%</h3></div><div>" +
+		self.openedInfoBubbles = [];
+		self.infoBubbleTemplate = "<div><h3>%Location%</h3></div><div>" +
 			"Wikipedia: <a href='%WikiLinkURL%' target='_blank'>%WikiLinkContent%</a><p>%WikiData%</p></div><div>" +
 			"<img class='flickr-img' src='%Img0%' alt='museum' height='200' width='200'></img>" +
 			"<img class='flickr-img' src='%Img1%' alt='museum' height='200' width='200'></img>" +
@@ -149,7 +149,6 @@ var mapSuccess = function(){
 						clearTimeout(flickrRequestTimeout);
 						marker.hasFlickrImages = true;
 						marker.flickrImages = [];
-						console.log(data);
 						// Construct 3 image URLs
 
 						// You can construct the source URL to a photo once you know its ID, server ID, farm ID and secret, as returned by many API methods.
@@ -214,28 +213,42 @@ var mapSuccess = function(){
 			return marker;
 		};
 
+		// InfoBubble Version
 		self.clickMarker = function(marker){
-			// Close any opened infoWindows
-			self.openedInfoWindows.forEach(function(infoWindow){
-				infoWindow.close();
+			self.openedInfoBubbles.forEach(function(infoBubble){
+				infoBubble.close();
 			});
 
-			// Bounce animation for 2 seconds
+			// Bound animation for marker for 1.4 seconds
 			marker.setAnimation(google.maps.Animation.BOUNCE);
 			setTimeout(function(){
 				marker.setAnimation(null);
 			}, 1400);
 
-			// Create and open infoWindow and add to list of open infoWindows
-			var infoWindow = new google.maps.InfoWindow({
-				content: self.markerInfoWindow(self.infoWindowTemplate, marker)
+			// Create and open infoBubble and add to list of open infoBubbles
+			var infoBubble = new InfoBubble({
+				map: self.map,
+				content: self.markerInfoBubble(self.infoBubbleTemplate, marker),
+				position: marker.getPosition(),
+				shadowStyle: 1,
+				padding: 0,
+				backgroundColor: 'rgb(57,57,57)',
+				borderRadius: 4,
+				arrowSize: 10,
+				borderWidth: 1,
+				borderColor: '#2c2c2c',
+				disableAutoPan: true,
+				hideCloseButton: true,
+				arrowPosition: 30,
+				backgroundClassName: 'phoney',
+				arrowStyle: 2
 			});
-			infoWindow.open(self.map, marker);
-			self.openedInfoWindows.push(infoWindow);
-		};
+			infoBubble.open(self.map, marker);
+			self.openedInfoBubbles.push(infoBubble);
+		}
 
-		// Returns string containing HTML for marker's infoWindow (similar to resume project)
-		self.markerInfoWindow = function(template, marker){
+		// Returns string containing HTML for marker's infoBubble (similar to resume project)
+		self.markerInfoBubble = function(template, marker){
 			// Wikipedia Success/Fail
 			var HTML = template.replace('%Location%', marker.title);
 			if (marker.hasWikiData){
