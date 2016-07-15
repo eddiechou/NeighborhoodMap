@@ -75,9 +75,9 @@ var mapSuccess = function(){
 		self.openedInfoBubbles = [];
 		self.infoBubbleTemplate = "<div><h3>%Location%</h3></div><div>" +
 			"Wikipedia: <a href='%WikiLinkURL%' target='_blank'>%WikiLinkContent%</a><p>%WikiData%</p></div><div>" +
-			"<img class='flickr-img' src='%Img0%' alt='museum' height='200' width='200'></img>" +
-			"<img class='flickr-img' src='%Img1%' alt='museum' height='200' width='200'></img>" +
-			"<img class='flickr-img' src='%Img2%' alt='museum' height='200' width='200'></img>" +
+			"<img class='flickr-img' src='%Img0%' alt='museum' height='150' width='150'></img>" +
+			"<img class='flickr-img' src='%Img1%' alt='museum' height='150' width='150'></img>" +
+			"<img class='flickr-img' src='%Img2%' alt='museum' height='150' width='150'></img>" +
 			"</div>";
 
 		// Ran whenever filter is changed
@@ -231,17 +231,19 @@ var mapSuccess = function(){
 				content: self.markerInfoBubble(self.infoBubbleTemplate, marker),
 				position: marker.getPosition(),
 				shadowStyle: 1,
-				padding: 0,
-				backgroundColor: 'rgb(57,57,57)',
-				borderRadius: 4,
-				arrowSize: 10,
-				borderWidth: 1,
+				padding: 10,
+				backgroundColor: 'rgb(255,255,255)',
+				borderRadius: 20,
+				arrowSize: 50,
+				borderWidth: 4,
 				borderColor: '#2c2c2c',
 				disableAutoPan: true,
 				hideCloseButton: true,
 				arrowPosition: 30,
 				backgroundClassName: 'phoney',
-				arrowStyle: 2
+				arrowStyle: 2,
+				maxWidth: 530,
+				minWidth: 530
 			});
 			infoBubble.open(self.map, marker);
 			self.openedInfoBubbles.push(infoBubble);
