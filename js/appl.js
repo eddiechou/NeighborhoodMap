@@ -17,6 +17,7 @@
   	$('#sidebar').toggle();
   });
 
+// Default loaded data for museums.
  var mapInfo = {
  	initialData: {
  		position: {
@@ -78,7 +79,7 @@ var mapSuccess = function(){
 			"<img class='flickr-img' src='%Img0%' alt='museum' height='150' width='150'></img>" +
 			"<img class='flickr-img' src='%Img1%' alt='museum' height='150' width='150'></img>" +
 			"<img class='flickr-img' src='%Img2%' alt='museum' height='150' width='150'></img>" +
-			"</div>";
+			"</div><div><p>Images retrieved from Flickr.</p></div>";
 
 		// Ran whenever filter is changed
 		// Updates displayedMarkers to only contain those that have substring in 'filter' (from user input)
@@ -123,6 +124,8 @@ var mapSuccess = function(){
 					clearTimeout(marker.wikiRequestTimeout);
 					marker.wikiData = response;
 					marker.hasWikiData = true;
+				}).fail(function(){
+					alert("Failed to get Wikipedia data.");
 				});
 			});
 		};
@@ -168,6 +171,8 @@ var mapSuccess = function(){
 							marker.flickrImages[i] = marker.flickrImages[i].replace('%secret%', imgData.secret);
 						}
 					}
+				}).fail(function(){
+					alert("Failed to get Flickr data.");
 				});
 			});
 		};
@@ -284,6 +289,5 @@ var mapSuccess = function(){
 
 // Google Maps API error
 var mapError = function(){
-	var mapErrorHTML = '<p>ERROR LOADING MAP</p>';
-	$('#map').append(mapErrorHTML);
-}
+	$('#map').append("<p style='text-align: center'>Error loading map from Google API.</p>");
+};
