@@ -1,19 +1,15 @@
-# neighborhood-map
+# Neighborhood Map
 ## Eddie Chou
 
----
-
-# Description
 This application uses Knockout.js as a framework to develop a single page application featuring a map of London with markers for a list of museums.
 
-To use: The sidebar on the left lists the locations by name. You may filter the list (and associated markers) by using the filter field at the bottom of the list. You may toggle the sidebar by clicking the accordion at the top left of the screen. Clicking on the name of the museum or its associated marker will open up an infoBubble, which displays relevant information from Wikipedia and several images from Flickr about the museum.
+# Description
+The sidebar on the left lists the locations by name. You may filter the list (and associated markers) by using the filter field at the bottom of the list. You may toggle the sidebar by clicking the accordion at the top left of the screen. Clicking on the name of the museum or its associated marker will open up an infoBubble, which displays relevant information from Wikipedia and several images from Flickr about the museum.
 
 APIs used: Google Maps, Wikipedia, and Foursquare.
 Libraries used: Knockout, jQuery, infoBubble.
 
----
-
-## Things Learned:
+# Things Learned:
 - How design patterns assist in developing a manageable codebase.
 - How frameworks decrease amount of time required developing an application and provide a number of utilities for you to use.
 - AJAX calls to 3rd party APIs.
