@@ -3,7 +3,12 @@
 
 This application uses Knockout.js as a framework to develop a single page application featuring a map of London with markers for a list of museums.
 
-## Instructions
+## Instructions to view project
+
+This project is hosted at [Neighborhood Map](http://eddiechou.github.io/neighborhood-map/).
+
+OR
+
 - Download the zip file.
 - Unzip the file.
 - Open index.html in a web browser.
