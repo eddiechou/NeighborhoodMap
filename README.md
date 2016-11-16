@@ -5,7 +5,7 @@ This application uses Knockout.js as a framework to develop a single page applic
 
 ## Instructions to view project
 
-This project is hosted at [Neighborhood Map](http://eddiechou.github.io/neighborhood-map/).
+This project is hosted at [Neighborhood Map](http://eddiechou.github.io/projects/neighborhood-map/).
 
 OR
 
